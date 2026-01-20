@@ -6,8 +6,13 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
-
+import {fetchAttestationRequest} from '@algorandfoundation/liquid-client'
 export default function HomeScreen() {
+  fetchAttestationRequest("https://debug.liquidauth.com").then((r)=>{
+    console.log(r)
+  }).catch((e)=>{
+    console.error(e)
+  })
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
