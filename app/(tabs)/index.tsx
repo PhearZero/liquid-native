@@ -6,7 +6,12 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
+// Barrel import
 import {fetchAttestationRequest} from '@algorandfoundation/liquid-client'
+// Named Exports/File Path
+import {SignalClient} from '@algorandfoundation/liquid-client/signal'
+
+console.log(SignalClient)
 export default function HomeScreen() {
   fetchAttestationRequest("https://debug.liquidauth.com").then((r)=>{
     console.log(r)
