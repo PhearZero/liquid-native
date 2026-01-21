@@ -1,23 +1,75 @@
+import 'react-native-get-random-values'
+import {registerGlobals} from "react-native-webrtc";
+import QRCodeStyled from 'react-native-qrcode-styled';
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
+import { StyleSheet, Text } from 'react-native';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
-// Barrel import
-import {fetchAttestationRequest} from '@algorandfoundation/liquid-client'
-// Named Exports/File Path
-import {SignalClient} from '@algorandfoundation/liquid-client/signal'
+import {SignalClient, fetchAttestationRequest} from '@algorandfoundation/liquid-client'
+import {useEffect, useMemo, useState} from "react";
 
-console.log(SignalClient)
+registerGlobals()
+
+const TEST_SERVER = "https://debug.liquidauth.com"
+const RTC_CONFIGURATION = {
+  iceServers: [
+    {
+      urls: [
+        'stun:stun.l.google.com:19302',
+        'stun:stun1.l.google.com:19302',
+        'stun:stun2.l.google.com:19302',
+      ],
+    },
+  ],
+};
 export default function HomeScreen() {
-  fetchAttestationRequest("https://debug.liquidauth.com").then((r)=>{
+  const [requestId] = useState(()=>SignalClient.generateRequestId());
+  const [status, setStatus] = useState('Connecting to Sockets...');
+  const [hasSocket, setHasSocket] = useState(false)
+  fetchAttestationRequest(TEST_SERVER).then((r)=>{
     console.log(r)
   }).catch((e)=>{
     console.error(e)
   })
+  const client = useMemo(()=>new SignalClient(
+      TEST_SERVER
+  ), []);
+
+
+  useEffect(() => {
+    function handleSocketConnect(){
+      setStatus("Connected to Sockets")
+      setHasSocket(true)
+    }
+    function handleSocketDisconnected(){
+      setStatus("Disconnected from Sockets")
+      setHasSocket(false)
+    }
+    client.on('connect', handleSocketConnect);
+    client.on('disconnect', handleSocketDisconnected);
+    return ()=>{
+      client.off('connect', handleSocketConnect);
+      client.off('disconnect', handleSocketDisconnected);
+    }
+  }, [client]);
+
+  useEffect(() => {
+    if(!hasSocket) return
+    async function connect() {
+      setStatus('Waiting for Peer...')
+      //liquid://debug.liquidauth.com/?requestId=019bde29-76eb-799d-992b-c9086ccc78c9
+      const dc = await client.peer(
+          requestId,
+          'offer',
+          RTC_CONFIGURATION
+      );
+      setStatus('Connected to Peer!')
+    }
+    try {
+      connect();
+    } catch (e) {
+      console.log(e);
+    }
+  }, [client, hasSocket, requestId]);
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -27,63 +79,12 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
       }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
+      <QRCodeStyled data={`liquid://${TEST_SERVER.replace('https://', '')}/?requestId=${requestId}`}/>
+      <Text>
+        Service: {TEST_SERVER}
+      </Text>
+      <Text>Request ID: {requestId}</Text>
+      <Text>Status: {status}</Text>
     </ParallaxScrollView>
   );
 }
