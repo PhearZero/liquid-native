@@ -1,7 +1,4 @@
 {
-  "plugins": [
-    "@config-plugins/react-native-webrtc"
-  ],
   "expo": {
     "name": "liquid-native",
     "slug": "liquid-native",
@@ -49,6 +46,14 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35
+          }
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",

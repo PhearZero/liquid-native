@@ -2,13 +2,116 @@ import 'react-native-get-random-values'
 import {registerGlobals} from "react-native-webrtc";
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { Image } from 'expo-image';
-import { StyleSheet, Text } from 'react-native';
+import {Button, StyleSheet, Text} from 'react-native';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
-import {SignalClient, fetchAttestationRequest} from '@algorandfoundation/liquid-client'
-import {useEffect, useMemo, useState} from "react";
+import {SignalClient, toBase64URL} from '@algorandfoundation/liquid-client'
+import {useCallback, useEffect, useMemo, useState} from "react";
+import nacl from "tweetnacl";
+import {get, create} from 'react-native-passkeys'
 
-registerGlobals()
+// Monkey-patch WebRTC
+registerGlobals();
 
+// We are monkey-patching the globals for consistency
+global.navigator.credentials = {
+  get(obj){
+    return get(obj?.publicKey)
+  },
+  async create(obj: {publicKey?: PublicKeyCredentialCreationOptions}){
+    const publicKey = obj?.publicKey
+    console.log(publicKey)
+    const data = await create({
+      attestation: "none",
+      challenge: toBase64URL(publicKey?.challenge),
+      user: {
+        id: toBase64URL(publicKey?.user?.id),
+        name: publicKey?.user?.name,
+        displayName: publicKey?.user?.displayName,
+      },
+      authenticatorSelection: publicKey?.authenticatorSelection,
+      pubKeyCredParams: publicKey?.pubKeyCredParams,
+      rp: {
+        name: publicKey?.rp?.name,
+        id: publicKey?.rp?.id,
+      }
+    });
+    console.log(data);
+    return data
+  }
+}
+
+// Hard coded key
+const TEST_ACCOUNT = {
+  addr: "IKMUKRWTOEJMMJD4MUAQWWB4C473DEHXLCYHJ4R3RZWZKPNE7E2ZTQ7VD4",
+  sk: new Uint8Array([
+    153,
+    99,
+    94,
+    233,
+    195,
+    182,
+    109,
+    64,
+    9,
+    200,
+    81,
+    184,
+    78,
+    219,
+    114,
+    95,
+    177,
+    210,
+    244,
+    157,
+    200,
+    206,
+    99,
+    196,
+    224,
+    196,
+    38,
+    72,
+    151,
+    81,
+    204,
+    245,
+    66,
+    153,
+    69,
+    70,
+    211,
+    113,
+    18,
+    198,
+    36,
+    124,
+    101,
+    1,
+    11,
+    88,
+    60,
+    23,
+    63,
+    177,
+    144,
+    247,
+    88,
+    176,
+    116,
+    242,
+    59,
+    142,
+    109,
+    149,
+    61,
+    164,
+    249,
+    53
+  ])
+}
+
+// Remote configuration
 const TEST_SERVER = "https://debug.liquidauth.com"
 const RTC_CONFIGURATION = {
   iceServers: [
@@ -21,20 +124,19 @@ const RTC_CONFIGURATION = {
     },
   ],
 };
+
 export default function HomeScreen() {
   const [requestId] = useState(()=>SignalClient.generateRequestId());
   const [status, setStatus] = useState('Connecting to Sockets...');
   const [hasSocket, setHasSocket] = useState(false)
-  fetchAttestationRequest(TEST_SERVER).then((r)=>{
-    console.log(r)
-  }).catch((e)=>{
-    console.error(e)
-  })
+  const [showQRCode, setShowQRCode] = useState(false)
+
+  // Connect to service
   const client = useMemo(()=>new SignalClient(
       TEST_SERVER
   ), []);
 
-
+  // Handle connection to service
   useEffect(() => {
     function handleSocketConnect(){
       setStatus("Connected to Sockets")
@@ -50,9 +152,15 @@ export default function HomeScreen() {
       client.off('connect', handleSocketConnect);
       client.off('disconnect', handleSocketDisconnected);
     }
-  }, [client]);
+  }, [client, requestId]);
 
   useEffect(() => {
+    if(hasSocket && showQRCode){
+      handleDataChannel();
+    }
+  }, [hasSocket, showQRCode]);
+
+  const handleDataChannel = useCallback(() => {
     if(!hasSocket) return
     async function connect() {
       setStatus('Waiting for Peer...')
@@ -62,6 +170,7 @@ export default function HomeScreen() {
           'offer',
           RTC_CONFIGURATION
       );
+      dc.send("Hello World")
       setStatus('Connected to Peer!')
     }
     try {
@@ -79,25 +188,52 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
       }>
-      <QRCodeStyled data={`liquid://${TEST_SERVER.replace('https://', '')}/?requestId=${requestId}`}/>
+      {!showQRCode &&<Button
+          onPress={()=>{
+            client.attestation(async (challenge: Uint8Array) => {
+              return {
+                requestId: '019be241-f7b1-7995-bea2-fc92b22c0c00',
+                origin: TEST_SERVER,
+                type: 'algorand',
+                address: TEST_ACCOUNT.addr,
+                signature: toBase64URL(nacl.sign.detached(challenge, TEST_ACCOUNT.sk)),
+                device: 'Demo Web Wallet'
+              }
+            }).then(r=>{
+              console.log("Attestation Response", r)
+            }).catch(e=>{
+              console.log(e)
+              setStatus(e.message)
+            })
+          }}
+          title="Scan QR Code"
+          color="#841584"
+          accessibilityLabel="Scan a QR Code"
+      />}
+      <Text>Or use another app to connect by scanning the following QR Code (Liquid Auth, this Application)</Text>
+      <Button title={showQRCode ? "Hide QR Code" : "Show QR Code"} onPress={()=>{
+        setShowQRCode(!showQRCode)
+      }}/>
+      {showQRCode &&
+          (<QRCodeStyled data={`liquid://${TEST_SERVER.replace('https://', '')}/?requestId=${requestId}`}/>)
+      }
+
+
+      <Text style={styles.titleInfo}>Debug Information</Text>
       <Text>
         Service: {TEST_SERVER}
       </Text>
-      <Text>Request ID: {requestId}</Text>
+      <Text>Device Request ID: {requestId}</Text>
       <Text>Status: {status}</Text>
+
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  titleInfo: {
+    fontSize: 20,
+    textTransform: "uppercase"
   },
   reactLogo: {
     height: 178,
@@ -107,3 +243,4 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
 });
+
