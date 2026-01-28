@@ -4,8 +4,8 @@ import {v4 as uuid} from 'uuid';
 import * as bip39 from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
 import {fromSeed} from "@algorandfoundation/xhd-wallet-api";
-export const MASTER_KEY_PAIRS_KEY = 'rocca_master_key_pairs'
-export const ACTIVE_MASTER_KEY_ID_KEY = 'rocca_active_master_key_id'
+export const MASTER_KEY_PAIRS_KEY = 'algo_master_key_pairs'
+export const ACTIVE_MASTER_KEY_ID_KEY = 'algo_active_master_key_id'
 
 
 export interface SecretKey {

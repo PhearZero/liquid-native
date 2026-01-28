@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const PREFERENCES_KEY = 'rocca_preferences'
+export const PREFERENCES_KEY = 'algo_preferences'
 export interface Preferences {
     feeCoverageEnabled: boolean
 }

@@ -30,7 +30,7 @@ export type CreatorAccount = {
 }
 
 
-export const WALLETS_KEY = 'rocca_wallets'
+export const WALLETS_KEY = 'algo_wallets'
 
 export interface Wallet {
     id: string
