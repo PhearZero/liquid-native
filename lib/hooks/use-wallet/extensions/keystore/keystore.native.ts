@@ -4,15 +4,30 @@ import {v4 as uuid} from 'uuid';
 import * as bip39 from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
 import {fromSeed} from "@algorandfoundation/xhd-wallet-api";
+import {BaseProvider} from "@/lib/hooks/use-wallet/types";
+import type {KeyStore, SecretKey} from "@/lib/hooks/use-wallet/extensions/keystore/types";
 export const MASTER_KEY_PAIRS_KEY = 'algo_master_key_pairs'
 export const ACTIVE_MASTER_KEY_ID_KEY = 'algo_active_master_key_id'
 
-
-export interface SecretKey {
-    id: string
-    name: string
-    value: string
+const init = (provider: BaseProvider, options: any): KeyStore => {
+    return {
+        secrets: options.secrets || [] as SecretKey[],
+        activeSecret: options.activeSecret || null as SecretKey | null,
+        keystore: options.keystore || {
+            secrets: [] as SecretKey[],
+            add: async (name: string, increment: boolean, strength: number) => await saveSecretKey(await generateSecretKey(name, increment, strength)),
+            remove: async (id: string) => {
+                await removeSecretKey(id)
+            },
+            import: async (mnemonic: string, name: string = "Secret Key") => await saveSecretKey({id: uuid(), name, value: mnemonic, type: 'bip39'}),
+            export: async (id: string) => (await getSecretKeyById(id))?.value,
+        },
+    }
 }
+
+export default init;
+
+// Implementation for React Native
 
 export async function generateSecretKey(name: string = "Secret Key", increment: boolean = true, strength: number = 256): Promise<SecretKey> {
     let postfix = "";
@@ -25,9 +40,10 @@ export async function generateSecretKey(name: string = "Secret Key", increment: 
         id: uuid(),
         name: `${name}${postfix}`,
         value: bip39.generateMnemonic(wordlist, strength),
+        type: 'bip39'
     }
 }
-export async function saveSecretKey(keyPair: SecretKey): Promise<void> {
+export async function saveSecretKey(keyPair: SecretKey): Promise<string> {
     const pairs = await getAllSecretKey()
     const index = pairs.findIndex((p) => p.id === keyPair.id)
     if (index >= 0) {
@@ -42,6 +58,7 @@ export async function saveSecretKey(keyPair: SecretKey): Promise<void> {
     if (!activeId) {
         await setActiveSecretKeyId(keyPair.id)
     }
+    return keyPair.id
 }
 
 export async function getAllSecretKey(): Promise<SecretKey[]> {

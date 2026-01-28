@@ -11,7 +11,7 @@ import {CreatorAccount} from "@/lib/account";
 import Decimal from "decimal.js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const ASSETS_KEY = 'rocca_assets'
+export const ASSETS_KEY = 'algo_assets'
 
 export type AssetType = 'Token' | 'NFT' | 'Contract' | 'Document'
 

@@ -55,7 +55,7 @@ function ImportModal({secrets, onClose, onError}: { secrets: SecretKey[], onClos
 
         await saveSecretKey({
             name: "Imported Key",
-            phrase: mnemonicInput,
+            value: mnemonicInput,
             id: uuid()
         })
         setMnemonicInput('')
@@ -113,7 +113,7 @@ function ExportModal({onClose, onError}: { onClose: () => void, onError: (error:
         try {
             const activeSecret = await getActiveSecretKey()
             if (!activeSecret) Alert.alert('Error', 'No active keypair found')
-            setExportedKey(activeSecret!.phrase)
+            setExportedKey(activeSecret!.value)
         } catch (e) {
             onError(e as Error)
         }

@@ -11,7 +11,7 @@ export type OnboardOptions = {
     provider: Provider
 }
 
-export async function onboardRocca({delayed, provider}: OnboardOptions) {
+export async function onboardAlgo({delayed, provider}: OnboardOptions) {
     const onboarded = await isOnboarded()
     if (onboarded) throw new Error("Already onboarded")
 
@@ -21,7 +21,7 @@ export async function onboardRocca({delayed, provider}: OnboardOptions) {
     // Generate a master key pair if none exists
     const masterKey = await getActiveSecretKeyId()
     if (!masterKey) {
-        await saveSecretKey(await generateSecretKey("Rocca Secret"))
+        await saveSecretKey(await generateSecretKey("Algo Secret"))
     }
 
     // assume some Provider library is called here to validate, it would return the address created

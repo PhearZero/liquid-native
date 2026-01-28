@@ -9,11 +9,12 @@ import {
     getActiveSecretKeyId,
     getProviderById, getSecretKeyById,
     getWallets,
-    onboardRocca,
+    onboardAlgo,
     Provider, saveSecretKey, setActiveSecretKeyId,
     signChallengeBytes
 } from "@/lib";
 import {SignalClient, toBase64URL} from "@algorandfoundation/liquid-client";
+import {useWallet} from "@/lib/hooks/use-wallet/hook";
 
 // Remote configuration
 const TEST_SERVER = "https://debug.liquidauth.com"
@@ -95,6 +96,7 @@ export function Present(){
 }
 
 export function Scan(){
+
     const router = useRouter()
     const [scanned, setScanned] = useState(false)
 
@@ -129,7 +131,7 @@ export function Scan(){
         })
     }
 
-    const handleRocca = async (provider: Provider) => {
+    const handleAlgo = async (provider: Provider) => {
 
         const existingProvider = await getProviderById(provider.id)
         if (existingProvider) {
@@ -146,13 +148,13 @@ export function Scan(){
         const title = isDelegatedAccount ? "Account Custodian" : "Provider Found";
         const description = isDelegatedAccount ? "This account will be used to delegate transactions to via the provider" : "This provider will be used to issue and verify credentials";
 
-        const body = `Do you wish to connect to this Rocca service?\n\n${url.host}\n\n${description}.`;
+        const body = `Do you wish to connect to this Algo service?\n\n${url.host}\n\n${description}.`;
 
         Alert.alert(title, body, [
             {
                 text: 'Connect',
                 onPress: async () => {
-                    await onboardRocca({provider})
+                    await onboardAlgo({provider})
 
                     router.push(`/onboarding/setup`)
                 },
@@ -174,8 +176,8 @@ export function Scan(){
 
             const provider = fromQRCode(data)
             switch (provider.type) {
-                case "rocca": // Connecting to a Rocca Provider includes intermezzo onboarding and fee delegation.
-                    handleRocca(provider)
+                case "rocca": // Connecting to a Algo Provider includes intermezzo onboarding and fee delegation.
+                    handleAlgo(provider)
                     break;
                 case "liquid": // Connecting to another wallet or service
                     handleLiquid(provider)

@@ -47,3 +47,8 @@ high-performance blockchain for state management and transaction recording.
    ```bash
    npm start
    ```
+## TODOS:
+
+- [X] Provider/Extension definition 
+- [ ] Basic Extension Operations (keystore, bip39, xhd)
+- [ ] Lifecycle Events for Provider: https://www.npmjs.com/package/before-after-hook

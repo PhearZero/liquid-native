@@ -6,12 +6,16 @@ import {
   addWallet,
   generateWallet, getWallets,
 } from "@/lib";
+import {useWallet} from "@/lib/hooks/use-wallet/hook";
+import {ReactNativeProvider} from "@/lib/hooks/use-wallet/providers/ReactNativeProvider";
 
 export default function Setup() {
   const router = useRouter()
   const { delayed, skip_local_keys } = useLocalSearchParams<{ delayed?: string, skip_local_keys?:string }>()
   const [isGenerating, setIsGenerating] = useState(()=>skip_local_keys !== 'true')
+  const {accounts, activeAccount, } = useWallet<ReactNativeProvider>();
 
+  console.log(accounts, activeAccount)
     // console.log(query)
     useEffect(() => {
         async function setup(){

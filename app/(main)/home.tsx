@@ -86,7 +86,7 @@ export default function Home() {
                 <Ionicons name="person-circle-outline" size={32} color="#007AFF" />
                 <View style={styles.credentialInfo}>
                     <Text style={styles.credentialName}>Verified Person</Text>
-                    <Text style={styles.credentialIssuer}>Issued by: Rocca IDP</Text>
+                    <Text style={styles.credentialIssuer}>Issued by: Algo IDP</Text>
                 </View>
             </View>
         </View>}

@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const PROVIDERS_KEY = 'rocca_providers'
+export const PROVIDERS_KEY = 'algo_providers'
 
 export interface ExtensionOptions {
     algod?: string | false
@@ -41,7 +41,7 @@ export interface Provider {
     //disconnect(): void
 }
 
-export type ProviderType = 'rocca' | 'provider' | 'liquid' | 'fido' | 'walletconnect' | 'pera' | 'algo'
+export type ProviderType = 'algo' | 'provider' | 'liquid' | 'fido' | 'walletconnect' | 'pera'
 export function fromQRCode(text: string): Provider {
     let data
     try {
@@ -64,7 +64,7 @@ export function fromQRCode(text: string): Provider {
             options: {
                 algod: parsedUrl.searchParams.get('algod') || undefined,
                 liquid: type === 'liquid' || parsedUrl.searchParams.get('liquid') === "true",
-                intermezzo: type === 'rocca' || parsedUrl.searchParams.get('intermezzo') === "true",
+                intermezzo: type === 'algo' || parsedUrl.searchParams.get('intermezzo') === "true",
                 //indexer: parsedUrl.searchParams.get('indexer') || undefined
             }
         }

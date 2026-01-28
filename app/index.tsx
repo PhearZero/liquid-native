@@ -44,6 +44,7 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(true)
   const [_isOnboarded, setIsOnboarded] = useState(false)
 
+
   useEffect(() => {
     isOnboarded().then((onboarded) => {
       setIsOnboarded(onboarded)

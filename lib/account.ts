@@ -15,7 +15,7 @@ import {
 import {
     generateSecretKey,
     getActiveSecretKeyId,
-    getSecretKeyById, saveSecretKey, SecretKey,
+    getSecretKeyById, saveSecretKey,
     setActiveSecretKeyId, toRootKey
 } from "@/lib/keystore";
 import * as bip39 from '@scure/bip39'
@@ -30,7 +30,7 @@ export type CreatorAccount = {
 }
 
 
-export const WALLETS_KEY = 'rocca_wallets'
+export const WALLETS_KEY = 'algo_wallets'
 
 export interface Wallet {
     id: string
@@ -107,12 +107,14 @@ export async function generateWallet(
     }
 
     let keyId = secretKeyId || await getActiveSecretKeyId();
+    console.log(keyId)
 
     const key = keyId ? await getSecretKeyById(keyId) : await initFreshKey()
+    console.log(key)
     const children = await getWalletsBySecretKeyId(key!.id, account);
 
     const pk = await xhd.keyGen(
-        fromSeed(Buffer.from(await bip39.mnemonicToSeed(key!.phrase, passphrase))),
+        fromSeed(Buffer.from(await bip39.mnemonicToSeed(key!.value, passphrase))),
         KeyContext.Address, account,
         typeof index !== 'undefined' ? index : Math.max(children.length, 0),
         derivationType

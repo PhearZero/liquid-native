@@ -92,7 +92,7 @@ classDiagram
     }
     class Identity {
         %% Abstration around identity and DigitalCredential API
-        %% TBD - Rocca/Intermezzo Identity Manager? Liquid Auth?
+        %% TBD - Algo/Intermezzo Identity Manager? Liquid Auth?
         %% TODO: large explainer on ephemerial keys and how they are used in DIDComm/etc
         ...
     }
