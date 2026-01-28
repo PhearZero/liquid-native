@@ -1,6 +1,9 @@
 # Liquid Wallet
 
-> **Note:** This project is currently in development and not officially released or support, just for illustration purposes.
+> [!WARNING]
+> This project is currently in development and not officially released or supported, just for illustration purposes.
+
+See [discovery](./DISCOVERY.md) for more information.
 
 ## Overview
 
@@ -26,7 +29,9 @@ high-performance blockchain for state management and transaction recording.
 ## Get started
 
 1. Install dependencies
-> **Note:** You must have [Node.js](https://nodejs.org/en/) installed on your machine.
+
+> [!NOTE]
+> You must have [Node.js](https://nodejs.org/en/) installed on your machine.
 > Also follow the instructions for https://www.npmjs.com/package/canvas
 
    ```bash
