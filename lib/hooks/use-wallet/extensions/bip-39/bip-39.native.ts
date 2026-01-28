@@ -1,19 +1,37 @@
-import * as SecureStore from "expo-secure-store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import {v4 as uuid} from 'uuid';
 import * as bip39 from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
+import {v4 as uuid} from 'uuid';
 import {fromSeed} from "@algorandfoundation/xhd-wallet-api";
+import {SecretKey} from "@/lib/hooks/use-wallet/extensions/bip-39/bip-39";
+import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 export const MASTER_KEY_PAIRS_KEY = 'algo_master_key_pairs'
 export const ACTIVE_MASTER_KEY_ID_KEY = 'algo_active_master_key_id'
 
+// React Native Implementation
+const init = async (provider: any, options: any) => {
+    // Extend BIP-39 with a Keystore when it is available
+    let extended = options.keystore ? {
+        secrets: await getAllSecretKey(),
+        bip39: {
+            add: async (name: string, increment: boolean, strength: number) => await saveSecretKey(await generateSecretKey(name, increment, strength)),
+            remove: (id: string) => getAllSecretKey().then(secrets => secrets.filter(s => s.id !== id)),
+            import: (mnemonic: string, name: string = "Secret Key") => saveSecretKey({id: uuid(), name, phrase: mnemonic}),
+            export: (id: string) => getAllSecretKey().then(secrets => secrets.find(s => s.id === id)?.phrase),
+        },
+    } : { secrets: [] }
+    return {
+        ...extended,
+        secrets: [...extended.secrets],
+        bip39: {
+            generate(){},
+            ...extended.bip39,
+        },
 
-export interface SecretKey {
-    id: string
-    name: string
-    phrase: string
+    }
 }
-
+export default init;
 export async function generateSecretKey(name: string = "Secret Key", increment: boolean = true, strength: number = 256): Promise<SecretKey> {
     let postfix = "";
     if (increment) {
@@ -58,7 +76,8 @@ export async function getActiveSecretKeyId(): Promise<string | null> {
     return await AsyncStorage.getItem(ACTIVE_MASTER_KEY_ID_KEY)
 }
 
-export async function setActiveSecretKeyId(id: string): Promise<void> {
+export async function setActiveSecretKeyId(id: string | null): Promise<void> {
+    if(id === null) return await AsyncStorage.removeItem(ACTIVE_MASTER_KEY_ID_KEY)
     await AsyncStorage.setItem(ACTIVE_MASTER_KEY_ID_KEY, id)
 }
 
@@ -76,7 +95,8 @@ export async function fromMnemonic(phrase: string, passphrase = ''): Promise<Uin
     }
     return fromSeed(Buffer.from(await bip39.mnemonicToSeed(phrase, passphrase)))
 }
-export async function removeSecretKey(id: string): Promise<void> {
+
+export async function removeMnemonic(id: string) {
     const pairs = await getAllSecretKey()
     const updatedPairs = pairs.filter(p => p.id !== id)
     await SecureStore.setItemAsync(MASTER_KEY_PAIRS_KEY, JSON.stringify(updatedPairs))

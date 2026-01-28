@@ -1,3 +1,9 @@
+import WithWalletAccounts from "./extensions/accounts";
+import WithAlgorand from "./extensions/algorand";
+import WithPasskeys from "./extensions/passkeys";
+import WithIntermezzo from "./extensions/intermezzo";
+import WithXHD from "./extensions/xhd";
+
 export enum ProviderId {
     BIATEC = 'biatec',
     DEFLY = 'defly',
@@ -16,7 +22,31 @@ export enum ProviderId {
 }
 
 //TODO: export type Extension<T, V> = (provider: Provider, options: T) => V
-export type Extension = (provider: Provider, options: any) => any
+export type Extension = (provider: Provider, options: any) => any | Promise<any>
+export interface ExtensionModule {
+    //TODO: init<T, V>: Extension
+    init: Extension
+}
+
+export interface ExtensionOptions {
+    accounts?: string | false | null
+    algod?: string | false | null
+    intermezzo?: boolean
+    liquid?: boolean
+    feeCoverage?: boolean
+    //oidc4v: unknown
+}
+
+export type ProviderType = 'algo' | 'provider' | 'liquid' | 'fido' | 'walletconnect' | 'pera'
+
+export type ProviderOptions = {
+    id: ProviderId;
+    name: string
+    url: URL
+    type: ProviderType
+    port?: number
+    ssl?: boolean
+}
 
 /**
  * Represents a base class for managing configurations and extensions dynamically.
@@ -27,65 +57,60 @@ export type Extension = (provider: Provider, options: any) => any
  */
 export class Provider {
     id: ProviderId;
-    options: any;
+    name: string
+    url: URL
+    type: ProviderType
+    port?: number
+    ssl?: boolean
+
+    // Extension Keys, TODO: infer these from the implementation
+    accounts?: any[]
+    activeAccount?: any
+    indexer?: any
+    algod?: any
+    passkeys?: any[]
+    activePasskey?: any
+    intermezzo?: boolean
+    liquid?: any
+    feeCoverage?: boolean
+    keystore?: any
+
+    options: ExtensionOptions
+    // TBD: Defaults for the Provider
+    static DEFAULTS = {};
 
     // Used to inject dependencies and|or check cross-dependencies between extensions
     // These can be independent packages consumed by the public or provided by third parties such as Pera
     static EXTENSIONS: Extension[] = [
         // Use Wallet Becomes a "Type of Provider" for any wallet that handles accounts
-        function WithWalletAccounts(provider: Provider, options: any) {
-            return {
-                accounts: options.accounts || [],
-                activeAccount: options.activeAccount || null,
-                managerStatus: options.managerStatus || null,
-            }
-        },
+        WithWalletAccounts,
         // Getting access to the indexer or algod could be optional
-        function WithAlgorand(provider, options){
-            return {
-                indexer: options.indexer || null,
-                algod: options.algod || null,
-            }
-        },
+        WithAlgorand,
         // Adding in passkeys becomes an extension of the Provider, allowing any wallet to support passkeys by becoming a Provider Extension
-        function WithPasskeys(provider: Provider, options: any) {
-            return {
-                passkeys: options.passkeys || [],
-                activePasskey: options.activePasskey || null,
-            }
-        },
+        WithPasskeys,
         // Adding extra functionality like Intermezzo, Liquid, and OIDC4VC becomes an extension of the Provider
-        function WithIntermezzo(provider: Provider, options: any) {
-            return {
-                intermezzo: options.intermezzo || false, // Would provide the API access information
-                liquid: options.liquid || {/* Default Liquid Auth Options*/}, // Other extensions could be loaded by default
-                // Manager operations could be included that have access to this.accounts
-            }
-        },
+        WithIntermezzo,
         // Adding in XHD
-        function WithXHD(provider, options){
-            return {
-                // TODO: these should be interfaces to the library with the key paths and type of operation
-                encrypt: options.encrypt || null,
-                decrypt: options.decrypt || null,
-            }
-        }
+        WithXHD
     ];
-
-    // TBD: Defaults for the Provider
-    static DEFAULTS = {};
 
     /**
      * Constructs a new instance of the class with the provided options.
      * It merges the default options with the supplied options and applies
      * any extensions defined in the class to the current instance.
      *
-     * @param id {ProviderId} - The unique identifier for the provider.
+     * @param config {ProviderOptions} - The unique identifier for the provider.
      * @param {object} [options] - Optional configuration options to customize the instance and extensions.
      *                              These options are merged with the default settings.
      */
-    constructor(id: ProviderId, options?: any) {
-        this.id = id;
+    constructor(config: ProviderOptions, options?: any) {
+        this.id = config.id;
+        this.name = config.name;
+        this.url = config.url;
+        this.type = config.type;
+        this.port = config.port;
+        this.ssl = config.ssl;
+
         this.options = {
             ...(this.constructor as typeof Provider).DEFAULTS,
             ...options,
@@ -108,9 +133,8 @@ export class Provider {
      * @param {Extension[]} extensions - An array of extensions to be added to the class. Extensions already present will be ignored.
      */
     static withExtensions(extensions: Extension[]): typeof Provider {
-        const currentExtensions = this.EXTENSIONS;
         return class extends this {
-            static EXTENSIONS = currentExtensions.concat(extensions.filter(ext => !currentExtensions.includes(ext)));
+            static EXTENSIONS = extensions;
             constructor(options: any) {
                 super(options)
             }
