@@ -14,8 +14,6 @@ export default function Setup() {
   const { delayed, skip_local_keys } = useLocalSearchParams<{ delayed?: string, skip_local_keys?:string }>()
   const [isGenerating, setIsGenerating] = useState(()=>skip_local_keys !== 'true')
   const {accounts, activeAccount, } = useWallet<ReactNativeProvider>();
-
-  console.log(accounts, activeAccount)
     // console.log(query)
     useEffect(() => {
         async function setup(){

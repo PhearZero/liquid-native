@@ -9,21 +9,18 @@ import type {KeyStore, SecretKey} from "@/lib/hooks/use-wallet/extensions/keysto
 export const MASTER_KEY_PAIRS_KEY = 'algo_master_key_pairs'
 export const ACTIVE_MASTER_KEY_ID_KEY = 'algo_active_master_key_id'
 
-const init = (provider: BaseProvider, options: any): KeyStore => {
-    return {
-        secrets: options.secrets || [] as SecretKey[],
-        activeSecret: options.activeSecret || null as SecretKey | null,
-        keystore: options.keystore || {
-            secrets: [] as SecretKey[],
-            add: async (name: string, increment: boolean, strength: number) => await saveSecretKey(await generateSecretKey(name, increment, strength)),
-            remove: async (id: string) => {
-                await removeSecretKey(id)
-            },
-            import: async (mnemonic: string, name: string = "Secret Key") => await saveSecretKey({id: uuid(), name, value: mnemonic, type: 'bip39'}),
-            export: async (id: string) => (await getSecretKeyById(id))?.value,
+const init = (provider: BaseProvider, options: any): KeyStore => ({
+    secrets: options.secrets || [] as SecretKey[],
+    activeSecret: options.activeSecret || null as SecretKey | null,
+    keystore: options.keystore || {
+        add: async (name: string, increment: boolean, strength: number) => await saveSecretKey(await generateSecretKey(name, increment, strength)),
+        remove: async (id: string) => {
+            await removeSecretKey(id)
         },
-    }
-}
+        import: async (mnemonic: string, name: string = "Secret Key") => await saveSecretKey({id: uuid(), name, value: mnemonic, type: 'bip39'}),
+        export: async (id: string) => (await getSecretKeyById(id))?.value,
+    },
+})
 
 export default init;
 
