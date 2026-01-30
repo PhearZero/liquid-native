@@ -6,12 +6,7 @@ import {ProviderId} from "@/lib/hooks/use-wallet/types";
 export default function RootLayout() {
   return (
       <AlgorandProvider provider={new ReactNativeProvider({
-          id: ProviderId.ALGORAND_PROVIDER,
-          url: new URL("https://debug.liquidauth.com"),
-          name: "Liquid Native Wallet",
-          type: 'provider',
-      }, {
-          algorand: {
+          options: {
               algod: {
                   token: '',
                   server: 'https://testnet-api.4160.nodely.dev',
@@ -22,7 +17,11 @@ export default function RootLayout() {
                   server: 'https://testnet-idx.4160.nodely.dev',
                   port: 443
               }
-          }
+          },
+          id: ProviderId.ALGORAND_PROVIDER,
+          url: new URL("https://debug.liquidauth.com"),
+          name: "Liquid Native Wallet",
+          type: 'provider'
       })}>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />

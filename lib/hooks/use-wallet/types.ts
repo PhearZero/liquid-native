@@ -1,28 +1,22 @@
-import {AlgorandClient} from "@algorandfoundation/algokit-utils";
-import {AlgodClient} from "@algorandfoundation/algokit-utils/algod-client";
-import {IndexerClient} from "@algorandfoundation/algokit-utils/indexer-client";
-import {KeyStoreExtension, SecretKey} from "@/lib/hooks/use-wallet/extensions/keystore/types";
-import {BIP39Extension} from "@/lib/hooks/use-wallet/extensions/bip-39/types";
-
 export enum ProviderId {
-    BIATEC = 'biatec',
-    DEFLY = 'defly',
-    DEFLY_WEB = 'defly-web',
-    CUSTOM = 'custom',
-    EXODUS = 'exodus',
-    KIBISIS = 'kibisis',
-    KMD = 'kmd',
-    LUTE = 'lute',
-    MAGIC = 'magic',
-    MNEMONIC = 'mnemonic',
-    PERA = 'pera',
-    WALLETCONNECT = 'walletconnect',
-    WEB3AUTH = 'web3auth',
-    W3_WALLET = 'w3-wallet',
+    // TODO: Decide on strongly typed provider IDs or allow for strings
+    // BIATEC = 'biatec',
+    // DEFLY = 'defly',
+    // DEFLY_WEB = 'defly-web',
+    // CUSTOM = 'custom',
+    // EXODUS = 'exodus',
+    // KIBISIS = 'kibisis',
+    // KMD = 'kmd',
+    // LUTE = 'lute',
+    // MAGIC = 'magic',
+    // MNEMONIC = 'mnemonic',
+    // PERA = 'pera',
+    // WALLETCONNECT = 'walletconnect',
+    // WEB3AUTH = 'web3auth',
+    // W3_WALLET = 'w3-wallet',
     ALGORAND_PROVIDER = 'algo-provider'
 }
 
-//TODO: export type Extension<T, V> = (provider: Provider, options: T) => V
 export type Extension<T = any> = (provider: any, options: any) => T | Promise<T>
 
 export interface ExtensionModule<T = any> {
@@ -107,8 +101,8 @@ export class Provider<E extends readonly Extension[] = any[]> {
         };
 
         // Apply extensions to the current instance
-        (this.constructor as typeof Provider).EXTENSIONS.forEach(async (ext: Extension) => {
-            const result = await ext(this, this.options);
+        (this.constructor as typeof Provider).EXTENSIONS.forEach((ext: Extension) => {
+            const result = ext(this, this.options);
             Object.assign(this, result);
         });
     }
@@ -121,9 +115,6 @@ export class Provider<E extends readonly Extension[] = any[]> {
     static withExtensions<E extends readonly Extension[]>(extensions: E): typeof Provider & { new (config: ProviderOptions, options?: any): Provider<E> & InferExtensions<E> } {
         return class extends this {
             static EXTENSIONS = extensions;
-            constructor(config: ProviderOptions, options?: any) {
-                super(config, options)
-            }
         } as any;
     }
 }
