@@ -31,15 +31,16 @@ high-performance blockchain for state management and transaction recording.
 1. Install dependencies
 
 > [!NOTE]
-> You must have [Node.js](https://nodejs.org/en/) installed on your machine.
-> Also follow the instructions for https://www.npmjs.com/package/canvas
+> - You must have [Node.js](https://nodejs.org/en/) installed on your machine.
+> - Follow the instructions for https://www.npmjs.com/package/canvas
+> - Ensure you are running on Java 17 
 
    ```bash
    sudo apt-get install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
    ```
    
    ```bash
-   npm install
+   npm install typescript -g && npm install
    ```
 
 2. Start the app
