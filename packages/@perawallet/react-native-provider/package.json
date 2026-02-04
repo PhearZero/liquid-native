@@ -1,0 +1,24 @@
+{
+  "name": "@perawallet/react-native-provider",
+  "version": "0.0.1",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "peerDependencies": {
+    "@algorandfoundation/wallet-provider": "^0.0.1",
+    "@algorandfoundation/xhd-accounts-extension": "^0.0.1"
+  },
+  "devDependencies": {
+    "@algorandfoundation/wallet-provider": "^0.0.1",
+    "@algorandfoundation/xhd-accounts-extension": "^0.0.1"
+  },
+  "dependencies": {
+    "@perawallet/react-native-keystore": "0.0.1"
+  }
+}

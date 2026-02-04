@@ -1,0 +1,21 @@
+{
+  "name": "@perawallet/react-native-keystore",
+  "version": "0.0.1",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "peerDependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "expo-secure-store": "^15.0.8"
+  },
+  "dependencies": {
+    "@tanstack/store": "^0.8.0"
+  }
+}

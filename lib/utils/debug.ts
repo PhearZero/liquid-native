@@ -8,7 +8,7 @@ import {
     ROCCA_STATE_KEY,
     WALLETS_KEY
 } from "@/lib";
-
+export const SECRET_KEYS_ITEM = 'pera_secrets'
 export async function clearAll(): Promise<void> {
     await Promise.all([
         AsyncStorage.multiRemove([
@@ -20,5 +20,6 @@ export async function clearAll(): Promise<void> {
             ASSETS_KEY,
         ]),
         SecureStore.deleteItemAsync(MASTER_KEY_PAIRS_KEY),
+        SecureStore.deleteItemAsync(SECRET_KEYS_ITEM),
     ])
 }

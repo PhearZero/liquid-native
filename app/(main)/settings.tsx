@@ -18,6 +18,10 @@ import {
 } from "@/lib";
 import {clearAll} from "@/lib/utils/debug";
 import {v4 as uuid} from "uuid";
+import {useWallet} from "@txnlab/use-wallet-react";
+import {getBindingIdentifiers} from "@babel/types";
+import keys = getBindingIdentifiers.keys;
+import {ReactNativeProvider} from "@/packages/@perawallet/react-native-provider/src";
 type KeyManagementModalType = "import-key" | "export-key"
 
 /**
@@ -149,6 +153,7 @@ function KeyManagementModal({secrets, open, view, onClose}: {
     onClose: () => void
 }) {
 
+
     const handleError = (e: Error) => {
         Alert.alert('Error', e.message)
     }
@@ -185,6 +190,7 @@ export default function Settings() {
         view: "import-key"
     })
 
+    const {secrets, keystore, crypto} = useWallet<ReactNativeProvider>();
 
     useEffect(() => {
         loadData()
@@ -224,8 +230,8 @@ export default function Settings() {
     }
 
     const handleAddMasterKey = async () => {
-        await saveSecretKey(await generateSecretKey())
-        await loadData()
+        return crypto?.bip39?.add ? await crypto?.bip39?.add() : undefined
+        //await saveSecretKey(await generateSecretKey())
     }
 
 
@@ -237,6 +243,7 @@ export default function Settings() {
                 style: 'destructive',
                 onPress: async () => {
                     await clearAll().catch(console.error)
+                    await keystore.clear()
                     router.replace('/')
                 },
             },
@@ -248,7 +255,7 @@ export default function Settings() {
         <ScrollView style={styles.container}>
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Secrets</Text>
-                {secretKeys.map((pair) => (
+                {secrets.map((pair: SecretKey) => (
                     <TouchableOpacity key={pair.id} style={styles.settingItem}
                                       onPress={() => handleSwitchMasterKey(pair.id)}>
                         <View>

@@ -1,0 +1,21 @@
+{
+  "name": "@algorandfoundation/xhd-accounts-extension",
+  "version": "0.0.1",
+  "description": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@algorandfoundation/accounts-extension": "0.0.1",
+    "@algorandfoundation/wallet-provider": "0.0.1",
+    "@algorandfoundation/xhd-crypto-extension": "0.0.1",
+    "@tanstack/store": "^0.8.0"
+  }
+}

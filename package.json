@@ -4,16 +4,25 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo run:android",
+    "build:workspace": "npm run build --workspaces --if-present",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android --device",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint"
   },
+  "workspaces": [
+    "packages/**"
+  ],
   "dependencies": {
     "@algorandfoundation/algokit-utils": "^10.0.0-alpha.32",
     "@algorandfoundation/liquid-client": "^1.0.0-canary.3",
     "@algorandfoundation/xhd-wallet-api": "^2.0.0-canary.1",
+
+    "@algorandfoundation/wallet-provider": "0.0.1",
+    "@perawallet/react-native-keystore": "0.0.1",
+
+    "@txnlab/use-wallet-react": "0.0.1",
     "@config-plugins/react-native-webrtc": "^13.0.0",
     "@expo/vector-icons": "^15.0.3",
     "@noble/hashes": "^2.0.1",

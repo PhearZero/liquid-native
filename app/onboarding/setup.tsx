@@ -2,36 +2,38 @@ import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import {useEffect, useState} from 'react'
 
-import {
-  addWallet,
-  generateWallet, getWallets,
-} from "@/lib";
-import {useWallet} from "@/lib/hooks/use-wallet/hook";
-import {ReactNativeProvider} from "@/lib/hooks/use-wallet/providers/ReactNativeProvider";
+import {useWallet} from "@txnlab/use-wallet-react";
+import {ReactNativeProvider} from "@perawallet/react-native-provider";
+import {setActiveSecretKeyId} from "@/lib";
 
 export default function Setup() {
+
   const router = useRouter()
   const { delayed, skip_local_keys } = useLocalSearchParams<{ delayed?: string, skip_local_keys?:string }>()
-  const [isGenerating, setIsGenerating] = useState(()=>skip_local_keys !== 'true')
-  const {accounts, activeAccount, } = useWallet<ReactNativeProvider>();
-    // console.log(query)
+    const [isGenerating, setIsGenerating] = useState(()=>skip_local_keys !== 'true')
+
+  const {accounts, activeAccount, wallet, crypto} = useWallet<ReactNativeProvider>();
+
     useEffect(() => {
         async function setup(){
-            const wallets = await getWallets()
-            if(wallets.length > 0) return
-            return addWallet(await generateWallet())
+            if(activeAccount || accounts.length > 0) return
+
+            const secretKey = await crypto.bip39.add!()
+            await wallet.xhd.generate({secretKeyId: secretKey.id})
+            return await setActiveSecretKeyId(secretKey.id)
         }
         setup().then(()=>{
             router.replace({pathname: '/(main)/home'})
         })
             .catch((e)=>{
                 console.error("Error during onboard", e)
+
                 setIsGenerating(false)
             })
             .finally(()=>{
                 setIsGenerating(false)
             })
-    }, [router]);
+    }, []);
 
 
 

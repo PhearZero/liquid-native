@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Animated, Easing } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Easing } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useState, useRef } from 'react'
@@ -11,6 +11,7 @@ import {
   Wallet,
 } from "@/lib";
 import {Identity} from "@/lib/identity";
+import {useWallet} from "@txnlab/use-wallet-react";
 
 export default function Home() {
   const router = useRouter()
@@ -23,6 +24,8 @@ export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([])
   const [identities, setIdentities] = useState<Identity[]>([])
 
+  const {accounts} = useWallet();
+  console.log(accounts)
   useEffect(() => {
     if (isGenerating) {
       Animated.loop(

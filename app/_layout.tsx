@@ -1,12 +1,19 @@
 import {Stack} from 'expo-router'
-import {AlgorandProvider} from "@/lib/hooks/use-wallet/provider";
-import {ReactNativeProvider} from "@/lib/hooks/use-wallet/providers/ReactNativeProvider";
-import {ProviderId} from "@/lib/hooks/use-wallet/types";
+import {AlgorandProvider} from "@txnlab/use-wallet-react";
+import {ReactNativeProvider} from "@perawallet/react-native-provider";
+import {v4 as uuidv4} from 'uuid';
+
+
 
 export default function RootLayout() {
   return (
       <AlgorandProvider provider={new ReactNativeProvider({
-          options: {
+          id: uuidv4(),
+          uri: new URL("https://debug.liquidauth.com"),
+          name: "Liquid Native Wallet",
+      }, {
+          keystore: true,
+          algorand:{
               algod: {
                   token: '',
                   server: 'https://testnet-api.4160.nodely.dev',
@@ -17,11 +24,7 @@ export default function RootLayout() {
                   server: 'https://testnet-idx.4160.nodely.dev',
                   port: 443
               }
-          },
-          id: ProviderId.ALGORAND_PROVIDER,
-          url: new URL("https://debug.liquidauth.com"),
-          name: "Liquid Native Wallet",
-          type: 'provider'
+          }
       })}>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
