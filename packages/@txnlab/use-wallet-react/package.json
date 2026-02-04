@@ -11,10 +11,14 @@
   },
   "author": "",
   "devDependencies": {
-    "@algorandfoundation/wallet-provider": "*"
+    "@algorandfoundation/wallet-provider": "*",
+    "@perawallet/react-native-keystore": "^0.0.1",
+    "@perawallet/react-native-provider": "*"
   },
   "peerDependencies": {
-    "@algorandfoundation/wallet-provider": "^0.0.1"
+    "@algorandfoundation/wallet-provider": "^0.0.1",
+    "@perawallet/react-native-keystore": "^0.0.1",
+    "@perawallet/react-native-provider": "^0.0.1"
   },
   "dependencies": {
     "@tanstack/react-store": "^0.8.0",
